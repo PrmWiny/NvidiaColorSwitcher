@@ -1,0 +1,47 @@
+## Visual Studio & .NET Build Artifacts
+bin/
+obj/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa]rm/
+[Aa]rm64/
+bld/
+[Bb]in/
+[Ob]j/
+Log/
+logs/
+
+## Visual Studio Cache & User Files
+.vs/
+*.user
+*.userossc
+*.sln.docstates
+*.suo
+*.userhost
+*.cache
+*.suo
+*.user
+*.userossc
+*.sln.docstates
+*.userhost
+*.vcxproj.user
+
+## Rider / JetBrains
+.idea/
+*.sln.iml
+
+## VS Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+## OS Generated Files
+.DS_Store
+Thumbs.db
+desktop.ini
+$RECYCLE.BIN/
