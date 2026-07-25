@@ -15,7 +15,7 @@
 - 📌 **System Tray Integration**: Easily switch profiles from the background System Tray icon, with instant minimization (`Esc` / `✕`).
 - ⚡ **Always-Enabled Apply & Live Preview**: Real-time slider feedback with instant Apply capability.
 - 🔒 **Safe Hardware Reset**: One-click reset to restore hardware defaults to original NVIDIA NVAPI `DefaultLevel` and GDI 1:1 linear ramps.
-- 📦 **Single File Executable**: Built into a standalone single `.exe` file (`dist/NvidiaColorSwitcher.exe`) with zero extra runtime dependencies required.
+- 📦 **Single File Executable**: Can be built into a standalone single `.exe` file with zero extra runtime dependencies required.
 
 ---
 
@@ -29,10 +29,7 @@
 
 ## 🚀 Quick Start (Download)
 
-1. Go to the [Releases](https://github.com/PrmWiny/Nvidia-Color-Profile-Setting/releases) section or grab the prebuilt executable from the `dist/` directory:
-   ```text
-   dist/NvidiaColorSwitcher.exe
-   ```
+1. Download the latest release executable from the [Releases](https://github.com/PrmWiny/Nvidia-Color-Profile-Setting/releases) section.
 2. Double-click **`NvidiaColorSwitcher.exe`** to launch.
 3. Adjust your preferred Digital Vibrance, Brightness, Contrast, and Gamma values, then click **💾 Save** to create your custom preset.
 
@@ -45,13 +42,8 @@
 - Windows 10 / 11 (x64)
 - NVIDIA GPU & Drivers (for NVAPI Digital Vibrance control)
 
-### Automated Build Script (`build.bat`)
-Run the included batch script to compile and publish to `dist/NvidiaColorSwitcher.exe`:
-```cmd
-build.bat
-```
-
-### Manual dotnet publish Command
+### Publishing Executable
+Run the dotnet publish command:
 ```powershell
 dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o ./dist
 ```
