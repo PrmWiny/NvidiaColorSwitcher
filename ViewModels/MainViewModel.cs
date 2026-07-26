@@ -13,10 +13,17 @@ namespace NvidiaColorSwitcher.ViewModels
     {
         private readonly NvidiaService _nvidiaService;
         private readonly ProfileStorageService _storageService;
+        private readonly UpdateService _updateService;
+
+        private bool _isUpdateAvailable;
+        private string _latestVersion = string.Empty;
+        private string _updateDownloadUrl = string.Empty;
+        private bool _isUpdating;
+        private string _updateProgressText = string.Empty;
 
         private int _digitalVibrance = 50;
-        private float _brightness = 0.0f;
-        private float _contrast = 0.0f;
+        private float _brightness = 50.0f;
+        private float _contrast = 50.0f;
         private float _gamma = 1.0f;
         private string _newProfileName = string.Empty;
         private ColorProfile? _selectedProfile;
@@ -25,8 +32,8 @@ namespace NvidiaColorSwitcher.ViewModels
         private bool _isLivePreviewEnabled = true;
 
         private int _appliedDigitalVibrance = 50;
-        private float _appliedBrightness = 0.0f;
-        private float _appliedContrast = 0.0f;
+        private float _appliedBrightness = 50.0f;
+        private float _appliedContrast = 50.0f;
         private float _appliedGamma = 1.0f;
 
         public event EventHandler? ProfilesUpdated;
@@ -34,8 +41,8 @@ namespace NvidiaColorSwitcher.ViewModels
         public ObservableCollection<ColorProfile> Profiles { get; } = new();
 
         public string DigitalVibranceText => $"{DigitalVibrance}%";
-        public string BrightnessText => $"{Brightness:+#0.0;-#0.0;0.0}%";
-        public string ContrastText => $"{Contrast:+#0.0;-#0.0;0.0}%";
+        public string BrightnessText => $"{Brightness:0.#}%";
+        public string ContrastText => $"{Contrast:0.#}%";
         public string GammaText => $"{Gamma:0.00}";
 
         public int DigitalVibrance
@@ -120,6 +127,36 @@ namespace NvidiaColorSwitcher.ViewModels
             set => SetProperty(ref _statusMessage, value);
         }
 
+        public bool IsUpdateAvailable
+        {
+            get => _isUpdateAvailable;
+            set => SetProperty(ref _isUpdateAvailable, value);
+        }
+
+        public string LatestVersion
+        {
+            get => _latestVersion;
+            set => SetProperty(ref _latestVersion, value);
+        }
+
+        public string UpdateDownloadUrl
+        {
+            get => _updateDownloadUrl;
+            set => SetProperty(ref _updateDownloadUrl, value);
+        }
+
+        public bool IsUpdating
+        {
+            get => _isUpdating;
+            set => SetProperty(ref _isUpdating, value);
+        }
+
+        public string UpdateProgressText
+        {
+            get => _updateProgressText;
+            set => SetProperty(ref _updateProgressText, value);
+        }
+
         public bool IsLivePreviewEnabled
         {
             get => _isLivePreviewEnabled;
@@ -150,6 +187,8 @@ namespace NvidiaColorSwitcher.ViewModels
                     if (!success)
                     {
                         StatusMessage = "Failed to update Windows Registry startup";
+                        _isAutoStartupEnabled = StartupService.IsAutoStartupEnabled();
+                        OnPropertyChanged(nameof(IsAutoStartupEnabled));
                     }
                     else
                     {
@@ -166,10 +205,13 @@ namespace NvidiaColorSwitcher.ViewModels
         public ICommand DeleteProfileCommand { get; }
         public ICommand ResetToDefaultCommand { get; }
         public ICommand SelectProfileCommand { get; }
+        public ICommand SelectAndApplyProfileCommand { get; }
         public ICommand ResetVibranceCommand { get; }
         public ICommand ResetBrightnessCommand { get; }
         public ICommand ResetContrastCommand { get; }
         public ICommand ResetGammaCommand { get; }
+        public ICommand CheckUpdateCommand { get; }
+        public ICommand PerformUpdateCommand { get; }
 
         #endregion
 
@@ -177,23 +219,30 @@ namespace NvidiaColorSwitcher.ViewModels
         {
             _nvidiaService = nvidiaService;
             _storageService = storageService;
+            _updateService = new UpdateService();
 
             ApplySelectedProfileCommand = new RelayCommand(ApplyCurrentSettings);
             SaveProfileCommand = new RelayCommand(SaveCurrentProfile);
             DeleteProfileCommand = new RelayCommand<ColorProfile>(DeleteProfile);
             ResetToDefaultCommand = new RelayCommand(ResetToDefault);
             SelectProfileCommand = new RelayCommand<ColorProfile>(SelectProfile);
+            SelectAndApplyProfileCommand = new RelayCommand<ColorProfile>(SelectAndApplyProfile);
 
             ResetVibranceCommand = new RelayCommand(ResetVibrance);
             ResetBrightnessCommand = new RelayCommand(ResetBrightness);
             ResetContrastCommand = new RelayCommand(ResetContrast);
             ResetGammaCommand = new RelayCommand(ResetGamma);
 
+            CheckUpdateCommand = new RelayCommand(() => CheckForUpdates(true));
+            PerformUpdateCommand = new RelayCommand(PerformUpdate);
+
             _isAutoStartupEnabled = StartupService.IsAutoStartupEnabled();
             OnPropertyChanged(nameof(IsAutoStartupEnabled));
 
             CheckHardwareStatus();
             LoadProfilesFromStorage();
+
+            _ = CheckForUpdates(false);
         }
 
         public void CheckHardwareStatus()
@@ -265,6 +314,13 @@ namespace NvidiaColorSwitcher.ViewModels
             OnPropertyChanged(nameof(SelectedProfile));
 
             LoadProfileIntoSliders(profile);
+        }
+
+        public void SelectAndApplyProfile(ColorProfile? profile)
+        {
+            if (profile == null) return;
+            SelectProfile(profile);
+            ApplyProfile(profile);
         }
 
         private void LoadProfileIntoSliders(ColorProfile profile)
@@ -463,20 +519,66 @@ namespace NvidiaColorSwitcher.ViewModels
 
         public void ResetBrightness()
         {
-            Brightness = 0.0f;
-            StatusMessage = "Reset Brightness to default (0.0%)";
+            Brightness = 50.0f;
+            StatusMessage = "Reset Brightness to default (50%)";
         }
 
         public void ResetContrast()
         {
-            Contrast = 0.0f;
-            StatusMessage = "Reset Contrast to default (0.0%)";
+            Contrast = 50.0f;
+            StatusMessage = "Reset Contrast to default (50%)";
         }
 
         public void ResetGamma()
         {
             Gamma = 1.0f;
             StatusMessage = "Reset Gamma to default (1.00)";
+        }
+
+        public async System.Threading.Tasks.Task CheckForUpdates(bool userInitiated = false)
+        {
+            if (userInitiated)
+            {
+                StatusMessage = "Checking for updates...";
+            }
+
+            var updateInfo = await _updateService.CheckForUpdatesAsync();
+            if (updateInfo != null)
+            {
+                IsUpdateAvailable = true;
+                LatestVersion = updateInfo.Version;
+                UpdateDownloadUrl = updateInfo.DownloadUrl;
+                StatusMessage = $"⚡ New version v{updateInfo.Version} available!";
+                ProfilesUpdated?.Invoke(this, EventArgs.Empty);
+            }
+            else if (userInitiated)
+            {
+                StatusMessage = $"You are using the latest version (v{UpdateService.CurrentVersion})";
+            }
+        }
+
+        public async void PerformUpdate()
+        {
+            if (IsUpdating || string.IsNullOrEmpty(UpdateDownloadUrl)) return;
+
+            IsUpdating = true;
+            UpdateProgressText = "Downloading update...";
+            StatusMessage = "Downloading update package...";
+
+            bool success = await _updateService.DownloadAndApplyUpdateAsync(
+                UpdateDownloadUrl, 
+                progress => System.Windows.Application.Current.Dispatcher.Invoke(() => 
+                {
+                    UpdateProgressText = $"Downloading... {progress}%";
+                    StatusMessage = $"Downloading update... {progress}%";
+                })
+            );
+
+            if (!success)
+            {
+                IsUpdating = false;
+                StatusMessage = "Failed to download update";
+            }
         }
     }
 }

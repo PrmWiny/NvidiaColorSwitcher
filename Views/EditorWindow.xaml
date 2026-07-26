@@ -17,6 +17,7 @@
         Icon="pack://application:,,,/Assets/app_icon.ico">
 
     <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
         <!-- Modern Dark Color Palette -->
         <SolidColorBrush x:Key="WindowBackground" Color="#121215" />
         <SolidColorBrush x:Key="CardBackground" Color="#1B1B20" />
@@ -450,22 +451,44 @@
                     <TextBlock Text="Real-Time Display Calibration &amp; NVAPI Control" Foreground="{StaticResource TextSecondary}" FontSize="11"/>
                 </StackPanel>
 
-                <!-- Close to System Tray Button -->
-                <Button Grid.Column="2" Click="CloseButton_Click" ToolTip="Close to System Tray" Width="26" Height="26" Background="Transparent" BorderThickness="0" Cursor="Hand">
-                    <Button.Template>
-                        <ControlTemplate TargetType="Button">
-                            <Border x:Name="b" Background="Transparent" CornerRadius="6">
-                                <TextBlock Text="✕" Foreground="{StaticResource TextSecondary}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="13"/>
-                            </Border>
-                            <ControlTemplate.Triggers>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter TargetName="b" Property="Background" Value="#2A2A35"/>
-                                    <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
-                                </Trigger>
-                            </ControlTemplate.Triggers>
-                        </ControlTemplate>
-                    </Button.Template>
-                </Button>
+                <!-- Title Bar Actions (Update Badge & Close Button) -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button Command="{Binding PerformUpdateCommand}" 
+                            Visibility="{Binding IsUpdateAvailable, Converter={StaticResource BooleanToVisibilityConverter}}" 
+                            ToolTip="Click to download and install the latest update" 
+                            Height="26" Padding="8,0" Margin="0,0,6,0" Cursor="Hand">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="b" Background="#283B10" BorderBrush="{StaticResource AccentBrush}" BorderThickness="1" CornerRadius="6" Padding="6,2">
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="⚡ Update" Foreground="{StaticResource AccentBrush}" FontSize="11" FontWeight="Bold"/>
+                                    </StackPanel>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="b" Property="Background" Value="#345014"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+
+                    <Button Click="CloseButton_Click" ToolTip="Close to System Tray" Width="26" Height="26" Background="Transparent" BorderThickness="0" Cursor="Hand">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="b" Background="Transparent" CornerRadius="6">
+                                    <TextBlock Text="✕" Foreground="{StaticResource TextSecondary}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="13"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="b" Property="Background" Value="#2A2A35"/>
+                                        <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                </StackPanel>
             </Grid>
 
             <!-- 2. Profile Selection & Auto Startup Bar -->
@@ -535,13 +558,13 @@
                                 <TextBlock Text="Brightness" Foreground="{StaticResource TextPrimary}" FontWeight="SemiBold" FontSize="12"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                                <Button Command="{Binding ResetBrightnessCommand}" ToolTip="Reset Brightness to 0.0%" Style="{StaticResource MiniResetButtonStyle}" Margin="0,0,6,0"/>
+                                <Button Command="{Binding ResetBrightnessCommand}" ToolTip="Reset Brightness to Default (50%)" Style="{StaticResource MiniResetButtonStyle}" Margin="0,0,6,0"/>
                                 <Border Background="#242820" BorderBrush="#3D5A10" BorderThickness="1" CornerRadius="5" Padding="5,1">
                                     <TextBlock Text="{Binding BrightnessText}" Foreground="{StaticResource AccentBrush}" FontWeight="Bold" FontSize="11"/>
                                 </Border>
                             </StackPanel>
                         </Grid>
-                        <Slider Minimum="-100" Maximum="100" Value="{Binding Brightness, Mode=TwoWay}" SmallChange="0.5" LargeChange="5"/>
+                        <Slider Minimum="0" Maximum="100" Value="{Binding Brightness, Mode=TwoWay}" SmallChange="0.5" LargeChange="5"/>
                     </StackPanel>
                 </Border>
 
@@ -554,13 +577,13 @@
                                 <TextBlock Text="Contrast" Foreground="{StaticResource TextPrimary}" FontWeight="SemiBold" FontSize="12"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                                <Button Command="{Binding ResetContrastCommand}" ToolTip="Reset Contrast to 0.0%" Style="{StaticResource MiniResetButtonStyle}" Margin="0,0,6,0"/>
+                                <Button Command="{Binding ResetContrastCommand}" ToolTip="Reset Contrast to Default (50%)" Style="{StaticResource MiniResetButtonStyle}" Margin="0,0,6,0"/>
                                 <Border Background="#242820" BorderBrush="#3D5A10" BorderThickness="1" CornerRadius="5" Padding="5,1">
                                     <TextBlock Text="{Binding ContrastText}" Foreground="{StaticResource AccentBrush}" FontWeight="Bold" FontSize="11"/>
                                 </Border>
                             </StackPanel>
                         </Grid>
-                        <Slider Minimum="-100" Maximum="100" Value="{Binding Contrast, Mode=TwoWay}" SmallChange="0.5" LargeChange="5"/>
+                        <Slider Minimum="0" Maximum="100" Value="{Binding Contrast, Mode=TwoWay}" SmallChange="0.5" LargeChange="5"/>
                     </StackPanel>
                 </Border>
 
@@ -673,7 +696,7 @@
                 </StackPanel>
 
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                    <TextBlock Text="NvidiaColorSwitcher v1.0 • " Foreground="{StaticResource TextMuted}" FontSize="10"/>
+                    <TextBlock Text="NvidiaColorSwitcher v1.0.1 • " Foreground="{StaticResource TextMuted}" FontSize="10"/>
                     <TextBlock Cursor="Hand" MouseDown="GitHubLink_MouseDown" ToolTip="Open GitHub Repository (PrmWiny/Nvidia-Color-Profile-Setting)">
                         <Run Text="GitHub" Foreground="{StaticResource AccentBrush}" FontSize="10" TextDecorations="Underline"/>
                     </TextBlock>

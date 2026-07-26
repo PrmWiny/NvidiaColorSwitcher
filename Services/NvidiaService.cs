@@ -156,8 +156,8 @@ namespace NvidiaColorSwitcher.Services
                 Id = "default-stock",
                 Name = "Default / Stock",
                 DigitalVibrance = defaultVibrance,
-                Brightness = 0.0f,
-                Contrast = 0.0f,
+                Brightness = 50.0f,
+                Contrast = 50.0f,
                 Gamma = 1.0f,
                 IsDefault = true
             };
@@ -295,8 +295,10 @@ namespace NvidiaColorSwitcher.Services
                 Blue = new ushort[256]
             };
 
-            float brightnessOffset = brightness / 200.0f;
-            float contrastFactor = (100.0f + contrast) / 100.0f;
+            float effBrightness = brightness - 50.0f;
+            float brightnessOffset = effBrightness / 200.0f;
+            float effContrast = contrast - 50.0f;
+            float contrastFactor = (100.0f + effContrast) / 100.0f;
             double gammaExponent = 1.0 / Math.Max(0.1, (double)gamma);
 
             for (int i = 0; i < 256; i++)
@@ -364,8 +366,8 @@ namespace NvidiaColorSwitcher.Services
                 }
             }
 
-            // Restore standard linear 1:1 identity ramp for Brightness 0, Contrast 0, Gamma 1.0
-            ApplyGammaRamp(0.0f, 0.0f, 1.0f);
+            // Restore standard linear 1:1 identity ramp for Brightness 50, Contrast 50, Gamma 1.0
+            ApplyGammaRamp(50.0f, 50.0f, 1.0f);
         }
 
         /// <summary>

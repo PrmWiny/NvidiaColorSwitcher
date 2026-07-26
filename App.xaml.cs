@@ -52,8 +52,15 @@ namespace NvidiaColorSwitcher
                     System.Diagnostics.Debug.WriteLine($"[App] Tray Icon init error: {trayEx.Message}");
                 }
 
-                // 4. Listen for profile list updates to refresh Tray Context Menu
+                // 4. Listen for profile list & startup updates to refresh Tray Context Menu
                 _viewModel.ProfilesUpdated += (s, args) => RefreshTrayContextMenu();
+                _viewModel.PropertyChanged += (s, args) =>
+                {
+                    if (args.PropertyName == nameof(MainViewModel.IsAutoStartupEnabled))
+                    {
+                        RefreshTrayContextMenu();
+                    }
+                };
 
                 // 5. Show Editor Window on startup so user sees the app UI immediately
                 ShowEditorWindow();
@@ -100,6 +107,20 @@ namespace NvidiaColorSwitcher
                 FontWeight = FontWeights.Bold
             };
             menu.Items.Add(headerItem);
+
+            // Check for Update Notification Item
+            if (_viewModel != null && _viewModel.IsUpdateAvailable)
+            {
+                var updateItem = new MenuItem
+                {
+                    Header = $"⚡ Update Available (v{_viewModel.LatestVersion})",
+                    FontWeight = FontWeights.Bold,
+                    Foreground = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0, 230, 118))
+                };
+                updateItem.Click += (s, args) => _viewModel.PerformUpdate();
+                menu.Items.Add(updateItem);
+            }
+
             menu.Items.Add(new Separator());
 
             // List of Saved Color Profiles
@@ -107,19 +128,19 @@ namespace NvidiaColorSwitcher
             {
                 foreach (var profile in _viewModel.Profiles)
                 {
+                    var p = profile;
                     var item = new MenuItem
                     {
-                        Header = profile.Name,
-                        Icon = profile.IsActive ? new TextBlock 
+                        Header = p.Name,
+                        Icon = p.IsActive ? new TextBlock 
                         { 
                             Text = "✓", 
                             Foreground = new SolidColorBrush(System.Windows.Media.Color.FromRgb(118, 185, 0)), 
                             FontWeight = FontWeights.Bold,
                             FontSize = 14
-                        } : null,
-                        Command = _viewModel.ApplySelectedProfileCommand,
-                        CommandParameter = profile
+                        } : null
                     };
+                    item.Click += (s, args) => _viewModel.SelectAndApplyProfile(p);
                     menu.Items.Add(item);
                 }
             }
@@ -140,15 +161,13 @@ namespace NvidiaColorSwitcher
             {
                 Header = "Run on Windows Startup",
                 IsCheckable = true,
-                IsChecked = StartupService.IsAutoStartupEnabled()
+                IsChecked = _viewModel?.IsAutoStartupEnabled ?? StartupService.IsAutoStartupEnabled()
             };
             startupItem.Click += (s, args) =>
             {
-                bool newState = !StartupService.IsAutoStartupEnabled();
-                StartupService.SetAutoStartup(newState);
                 if (_viewModel != null)
                 {
-                    _viewModel.IsAutoStartupEnabled = newState;
+                    _viewModel.IsAutoStartupEnabled = !_viewModel.IsAutoStartupEnabled;
                 }
             };
             menu.Items.Add(startupItem);

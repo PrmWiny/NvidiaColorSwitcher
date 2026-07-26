@@ -18,14 +18,14 @@ namespace NvidiaColorSwitcher.Models
         public int DigitalVibrance { get; set; } = 50;
 
         /// <summary>
-        /// Brightness percentage offset range: -100% to +100% (Default: 0.0)
+        /// Brightness percentage range: 0% to 100% (NVIDIA Default: 50%)
         /// </summary>
-        public float Brightness { get; set; } = 0.0f;
+        public float Brightness { get; set; } = 50.0f;
 
         /// <summary>
-        /// Contrast percentage offset range: -100% to +100% (Default: 0.0)
+        /// Contrast percentage range: 0% to 100% (NVIDIA Default: 50%)
         /// </summary>
-        public float Contrast { get; set; } = 0.0f;
+        public float Contrast { get; set; } = 50.0f;
 
         /// <summary>
         /// Gamma exponent range: 0.5 to 2.8 (Default: 1.0)

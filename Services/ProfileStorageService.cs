@@ -185,40 +185,10 @@ namespace NvidiaColorSwitcher.Services
                     Id = "default-stock",
                     Name = "Default / Stock",
                     DigitalVibrance = 50,
-                    Brightness = 0.0f,
-                    Contrast = 0.0f,
+                    Brightness = 50.0f,
+                    Contrast = 50.0f,
                     Gamma = 1.0f,
                     IsDefault = true
-                },
-                new ColorProfile
-                {
-                    Id = "vibrant-gaming",
-                    Name = "Vibrant Gaming",
-                    DigitalVibrance = 75,
-                    Brightness = 5.0f,
-                    Contrast = 10.0f,
-                    Gamma = 1.1f,
-                    IsDefault = false
-                },
-                new ColorProfile
-                {
-                    Id = "cinema-media",
-                    Name = "Cinema & Media",
-                    DigitalVibrance = 60,
-                    Brightness = 0.0f,
-                    Contrast = 5.0f,
-                    Gamma = 0.95f,
-                    IsDefault = false
-                },
-                new ColorProfile
-                {
-                    Id = "soft-reading",
-                    Name = "Eye Saver / Night",
-                    DigitalVibrance = 45,
-                    Brightness = -10.0f,
-                    Contrast = -5.0f,
-                    Gamma = 1.2f,
-                    IsDefault = false
                 }
             };
         }
