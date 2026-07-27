@@ -48,7 +48,7 @@ namespace NvidiaColorSwitcher.Services
 
                     if (!string.IsNullOrEmpty(exePath))
                     {
-                        key.SetValue(AppName, $"\"{exePath}\"");
+                        key.SetValue(AppName, $"\"{exePath}\" --autostart");
                     }
                 }
                 else

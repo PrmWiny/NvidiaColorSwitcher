@@ -696,7 +696,7 @@
                 </StackPanel>
 
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                    <TextBlock Text="NvidiaColorSwitcher v1.0.1 • " Foreground="{StaticResource TextMuted}" FontSize="10"/>
+                    <TextBlock Text="NvidiaColorSwitcher v1.0.2 • " Foreground="{StaticResource TextMuted}" FontSize="10"/>
                     <TextBlock Cursor="Hand" MouseDown="GitHubLink_MouseDown" ToolTip="Open GitHub Repository (PrmWiny/Nvidia-Color-Profile-Setting)">
                         <Run Text="GitHub" Foreground="{StaticResource AccentBrush}" FontSize="10" TextDecorations="Underline"/>
                     </TextBlock>

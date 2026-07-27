@@ -25,7 +25,7 @@ namespace NvidiaColorSwitcher.Services
             get
             {
                 var ver = Assembly.GetExecutingAssembly().GetName().Version;
-                return ver ?? new Version(1, 0, 1);
+                return ver ?? new Version(1, 0, 2);
             }
         }
 

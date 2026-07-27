@@ -34,10 +34,35 @@ namespace NvidiaColorSwitcher
 
             try
             {
+                // Check if launched with --autostart or --minimized argument
+                bool startMinimized = false;
+                if (e.Args != null)
+                {
+                    foreach (var arg in e.Args)
+                    {
+                        if (string.Equals(arg, "--autostart", StringComparison.OrdinalIgnoreCase) ||
+                            string.Equals(arg, "--minimized", StringComparison.OrdinalIgnoreCase) ||
+                            string.Equals(arg, "-autostart", StringComparison.OrdinalIgnoreCase) ||
+                            string.Equals(arg, "-minimized", StringComparison.OrdinalIgnoreCase) ||
+                            string.Equals(arg, "/autostart", StringComparison.OrdinalIgnoreCase) ||
+                            string.Equals(arg, "/minimized", StringComparison.OrdinalIgnoreCase))
+                        {
+                            startMinimized = true;
+                            break;
+                        }
+                    }
+                }
+
                 // 1. Initialize Core Services & ViewModel
                 _nvidiaService = new NvidiaService();
                 _storageService = new ProfileStorageService();
                 _viewModel = new MainViewModel(_nvidiaService, _storageService);
+
+                // If auto-startup is enabled in registry, ensure the registry path includes --autostart flag
+                if (_viewModel.IsAutoStartupEnabled)
+                {
+                    StartupService.SetAutoStartup(true);
+                }
 
                 // 2. Initialize Editor Window (Floating WPF UI)
                 _editorWindow = new EditorWindow(_viewModel);
@@ -62,8 +87,11 @@ namespace NvidiaColorSwitcher
                     }
                 };
 
-                // 5. Show Editor Window on startup so user sees the app UI immediately
-                ShowEditorWindow();
+                // 5. Show Editor Window on startup only if not launching minimized to tray
+                if (!startMinimized)
+                {
+                    ShowEditorWindow();
+                }
             }
             catch (Exception ex)
             {

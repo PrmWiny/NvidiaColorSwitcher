@@ -279,11 +279,15 @@ namespace NvidiaColorSwitcher.ViewModels
                 OnPropertyChanged(nameof(SelectedProfile));
                 LoadProfileIntoSliders(activeProfile);
 
-                if (currentHardwareVibrance.HasValue && activeProfile.Id == "default-stock")
+                if (currentHardwareVibrance.HasValue && activeProfile.Id == "default-stock" && !_storageService.HasCustomConfig())
                 {
                     _isLivePreviewEnabled = false;
                     DigitalVibrance = currentHardwareVibrance.Value;
                     _isLivePreviewEnabled = true;
+                }
+                else
+                {
+                    _nvidiaService.ApplyProfile(activeProfile);
                 }
             }
 
